@@ -5,7 +5,7 @@ Created on Sat Jun  8 12:05:29 2019
 @author: Wladek
 """
 import numpy as np
-from simple_neural_network.NN_function import initialize_parameters, forward_propagation, compute_cost, backward_propagation, \
+from NN_function import initialize_parameters, forward_propagation, compute_cost, backward_propagation, \
     update_parameters
 
 
@@ -28,15 +28,20 @@ def nn_model(X, Y, n_h, num_iterations=10000, print_cost=False):
     parameters = initialize_parameters(n_x, n_h, n_y)
     # Loop (gradient descent)
     for i in range(0, num_iterations):
-        # Forward propagation. Inputs: "X, parameters". Outputs: "A2, cache".
-        A2, cache = forward_propagation(X, parameters)
-        # Cost function. Inputs: "A2, Y, parameters". Outputs: "cost".
-        cost = compute_cost(A2, Y, parameters)
-        # Backpropagation. Inputs: "parameters, cache, X, Y". Outputs: "grads".
-        grads = backward_propagation(parameters, cache, X, Y)
-        # Gradient descent parameter update. Inputs: "parameters, grads". Outputs: "parameters".
-        parameters = update_parameters(parameters, grads)
-        # Print the cost every 1000 iterations
-        if print_cost and i % 1000 == 0:
+        cost = 0;
+        for b in range(0, X.shape[1], 32):
+            x_batch = X[:, b:b+32]
+            y_batch = Y[:, b:b+32]
+            # Forward propagation. Inputs: "X, parameters". Outputs: "A2, cache".
+            A2, cache = forward_propagation(x_batch, parameters)
+            # Cost function. Inputs: "A2, Y, parameters". Outputs: "cost".
+            cost_temp = compute_cost(A2, y_batch, parameters)
+            # Backpropagation. Inputs: "parameters, cache, X, Y". Outputs: "grads".
+            grads = backward_propagation(parameters, cache, x_batch, y_batch)
+            # Gradient descent parameter update. Inputs: "parameters, grads". Outputs: "parameters".
+            parameters = update_parameters(parameters, grads)
+            # Print the cost every 1000 iterations
+            cost += cost_temp
+        if print_cost and i % 100 == 0:
             print("Cost after iteration %i: %f" % (i, cost))
     return parameters
